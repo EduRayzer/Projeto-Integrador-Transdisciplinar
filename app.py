@@ -12,7 +12,7 @@ products = [
     {'id': 3, 'name': 'Jantar Gourmet Unifran', 'price': 40.0}
 ]
 
-# Usuários fictícios para login
+# Usuários fictícios para login (vamos substituir por um dicionário em memória)
 users = {
     'admin': 'unifran',  # username: password
 }
@@ -36,6 +36,30 @@ def login():
         
         flash('Login inválido. Tente novamente.', 'danger')
     return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        
+        # Verifica se o nome de usuário já existe
+        if username in users:
+            flash('Nome de usuário já existe. Tente outro.', 'danger')
+            return render_template('signup.html')
+
+        # Verifica se as senhas coincidem
+        if password != confirm_password:
+            flash('As senhas não coincidem. Tente novamente.', 'danger')
+            return render_template('signup.html')
+
+        # Adiciona o novo usuário ao dicionário
+        users[username] = password
+        flash('Cadastro realizado com sucesso. Agora faça login.', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('signup.html')
 
 @app.route('/logout')
 def logout():
@@ -80,6 +104,25 @@ def add_to_cart(product_id):
     
     return redirect(url_for('cart'))
 
+@app.route('/remove_from_cart/<int:product_id>', methods=['POST'])
+def remove_from_cart(product_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    
+    # Recupera o carrinho da sessão
+    cart = session.get('cart', {})
+    
+    if str(product_id) in cart:
+        # Remove o produto do carrinho se a quantidade for 1
+        if cart[str(product_id)] > 1:
+            cart[str(product_id)] -= 1  # Decrementa a quantidade
+        else:
+            del cart[str(product_id)]  # Remove o produto do carrinho
+        
+        session['cart'] = cart  # Atualiza o carrinho na sessão
+    
+    return redirect(url_for('cart'))  # Redireciona para a página do carrinho
+
 @app.route('/checkout')
 def checkout():
     if 'user' not in session:
@@ -88,6 +131,13 @@ def checkout():
     session.pop('cart', None)  # Limpa o carrinho após a compra
     flash('Compra finalizada com sucesso!', 'success')
     return redirect(url_for('products_view'))
+
+@app.context_processor
+def inject_cart_count():
+    """Função para injetar o número total de itens no carrinho em todas as páginas"""
+    cart = session.get('cart', {})
+    cart_count = sum(cart.values())  # Soma as quantidades dos itens no carrinho
+    return {'cart_count': cart_count}
 
 if __name__ == '__main__':
     app.run(debug=True)
