@@ -14,7 +14,7 @@ products = [
 
 # Usuários fictícios para login
 users = {
-    'admin': 'password123',  # username: password
+    'admin': 'unifran',  # username: password
 }
 
 # Página inicial que redireciona para o login
