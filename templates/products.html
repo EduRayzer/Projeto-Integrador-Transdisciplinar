@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2 class="mt-5">Produtos</h2>
+        <ul class="list-group">
+            {% for product in products %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ product.name }} - R$ {{ product.price }}
+                    <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-success btn-sm">Adicionar ao carrinho</a>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('cart') }}" class="btn btn-primary mt-3">Ver Carrinho</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger mt-3">Sair</a>
+    </div>
+</body>
+</html>
